@@ -5,6 +5,7 @@
         <group>
             <file>file:/home/datbt/workspace/BChatServer/src/com/bchat/dbhelper/BChatDataBaseHelper.java</file>
             <file>file:/home/datbt/workspace/BChatServer/src/com/bchat/server/BChatServiceImpl.java</file>
+            <file>file:/home/datbt/workspace/BChatServer/src/com/bchat/service/Request.java</file>
         </group>
     </open-files>
 </project-private>

@@ -5,6 +5,8 @@
  */
 package com.bchat.server;
 
+import com.bchat.code.RequestCode;
+import com.bchat.dbhelper.BChatDataBaseHelper;
 import com.bchat.service.Account;
 import com.bchat.service.Chatter;
 import com.bchat.service.Request;
@@ -17,29 +19,62 @@ import org.apache.thrift.TException;
  */
 public class BChatServiceImpl implements Chatter.Iface{
 
+    private final BChatDataBaseHelper dbHelper;
     public BChatServiceImpl() {
+        dbHelper = new BChatDataBaseHelper();
     }
     
     
 
     @Override
     public boolean login(String id, String password) throws TException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        boolean loginStatus = dbHelper.authenticateUserLogin(id, password);
+       
+        return loginStatus;
     }
 
     @Override
     public List<Account> getFriendList(String userid) throws TException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        List<Account> friendList = dbHelper.getFriendList(userid);
+        return friendList;
     }
 
     @Override
     public boolean sendRequest(Request request) throws TException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        boolean sendStatus = false;
+        switch (request.getRequestCode()){
+            case RequestCode.FRIEND_ACCEPT:
+                sendStatus = (dbHelper.insertFriends(request.getSender().getId(), request.getReceiver())
+                                && dbHelper.deleteFriendRequest(request));
+                break;
+                
+            case RequestCode.FRIEND_DENY:
+                sendStatus = dbHelper.deleteFriendRequest(request);
+                break;
+                
+            case RequestCode.FRIEND_DELETE:
+                sendStatus = dbHelper.deleteFriend(request.getSender().getId(), request.getReceiver());
+                break;
+                
+            case RequestCode.CHAT_MESSAGE:
+            case RequestCode.FRIEND_REQUEST:
+                sendStatus = dbHelper.insertRequest(request);
+                break;
+            default:
+                break;
+        }
+        
+         
+        return sendStatus;
     }
 
     @Override
     public List<Request> getRequest(String userid) throws TException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        List<Request> requestList = dbHelper.getRequestList(userid);
+        if (requestList != null && !requestList.isEmpty()){
+            dbHelper.deleteChatRequest(userid);
+        }
+        return requestList;
     }
     
 }
